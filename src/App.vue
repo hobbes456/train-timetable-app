@@ -1,11 +1,7 @@
-<script setup></script>
-
 <template>
-    <h1 class="title">Расписание поездов</h1>
+    <MainScreen />
 </template>
 
-<style scoped lang="scss">
-.title {
-    font-size: 20px;
-}
-</style>
+<script setup>
+import MainScreen from './components/screens/MainScreen.vue'
+</script>
