@@ -1,9 +1,9 @@
 <template>
     <div class="modalWindow">
-        <div @click="props.onClose" class="modalWindow__field" />
+        <div @click="props.onClose" class="modalWindow__field"></div>
         <div class="modalWindow__content">
             <h1 class="modalWindow__title">{{ props.title }}</h1>
-            <slot />
+            <slot></slot>
         </div>
     </div>
 </template>
@@ -25,7 +25,7 @@ const props = defineProps({
 
 <style lang="scss" scoped>
 .modalWindow {
-    position: fixed;
+    position: absolute;
     top: 10%;
     right: 0;
     left: 0;
