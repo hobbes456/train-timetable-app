@@ -1,3 +1,4 @@
+import 'node_modules/vue/dist/vue.global.js'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
