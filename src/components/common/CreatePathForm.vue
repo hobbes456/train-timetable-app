@@ -1,81 +1,41 @@
 <template>
     <form class="createPathForm" @submit.prevent="handleSubmit">
-        <div class="createPathForm__item">
-            <label for="departurePlace">Место отправления:</label>
-            <div class="createPathForm__inputs">
-                <input
-                    class="createPathForm__field"
-                    type="text"
-                    id="departurePlace"
-                    v-model="departurePlace"
-                    required
-                />
-                <input
-                    class="createPathForm__field"
-                    type="time"
-                    id="departureTime"
-                    v-model="departureTime"
-                    required
-                />
-            </div>
-        </div>
-        <div v-for="(stop, index) in stops" :key="index" class="createPathForm__item">
-            <div>
-                <label :for="'place' + index">Остановка №{{ index + 1 }}:</label>
-                <button type="button" @click="removeStop(index)">Х</button>
-            </div>
-            <div class="createPathForm__inputs">
-                <input
-                    class="createPathForm__field"
-                    type="text"
-                    :id="'place' + index"
-                    v-model="stop.place"
-                    required
-                />
-                <input
-                    class="createPathForm__field"
-                    type="time"
-                    v-model="stop.arrivalTime"
-                    required
-                />
-                <input
-                    class="createPathForm__field"
-                    type="time"
-                    v-model="stop.departureTime"
-                    required
-                />
-            </div>
-            <p>Время в пути: {{ calculateTimeToStop(index) }}</p>
-        </div>
-        <button type="button" @click="addStop">Добавить остановку</button>
-        <div class="createPathForm__item">
-            <label for="arrivalPlace">Место прибытия:</label>
-            <div class="createPathForm__inputs">
-                <input
-                    class="createPathForm__field"
-                    type="text"
-                    id="arrivalPlace"
-                    v-model="arrivalPlace"
-                    required
-                />
-                <input
-                    class="createPathForm__field"
-                    type="time"
-                    id="arrivalTime"
-                    v-model="arrivalTime"
-                    required
-                />
-            </div>
-        </div>
+        <FormItem
+            title="Место отправления:"
+            v-model:place="departurePlace"
+            v-model:time="departureTime"
+        />
+        <FormStopItem
+            v-for="(stop, index) in stops"
+            :key="index"
+            :index="index"
+            :path-time="calculateTimeToStop(index)"
+            :onDelete="deleteStop"
+            v-model:place="stop.place"
+            v-model:a_time="stop.arrivalTime"
+            v-model:d_time="stop.departureTime"
+        />
+        <button class="createPathForm__button" type="button" @click="addStop">
+            Добавить остановку
+        </button>
+        <FormItem title="Место прибытия:" v-model:place="arrivalPlace" v-model:time="arrivalTime" />
         <p>Общее время маршрута {{ totalTravelTime }}</p>
-        <button type="submit">Создать маршрут</button>
+        <button class="createPathForm__button" type="submit">Создать маршрут</button>
     </form>
 </template>
 <script setup>
 import { ref, computed } from 'vue'
 
+import { usePathesStore } from '@/stores/usePathesStore'
+import { useWindowStore } from '@/stores/useWindowStore'
+
+import FormItem from '@/components/common/FormItem.vue'
+import FormStopItem from '@/components/common/FormStopItem.vue'
+
 import { timeToMinutes } from '@/constants/timeToMinutes'
 import { formatTime } from '@/constants/formatTime'
+import { PathItem } from '@/constants/classes/PathItem'
+import { StopItem } from '@/constants/classes/StopItem'
 
 const departurePlace = ref('')
 const departureTime = ref('')
@@ -84,6 +44,12 @@ const arrivalPlace = ref('')
 const arrivalTime = ref('')
 
 const stops = ref([])
+
+const pathesStore = usePathesStore()
+const { addPath } = pathesStore
+
+const windowStore = useWindowStore()
+const { handleCreatePathFormOpen } = windowStore
 
 const calculateTimeToStop = (stopIndex) => {
     let totalMinutes = 0
@@ -97,7 +63,7 @@ const calculateTimeToStop = (stopIndex) => {
         )
     }
 
-    return totalMinutes ? formatTime(totalMinutes) : '(требуется расчет)'
+    return formatTime(totalMinutes)
 }
 
 const totalTravelTime = computed(() => {
@@ -111,14 +77,26 @@ const totalTravelTime = computed(() => {
 })
 
 const addStop = () => {
-    stops.value.push({ place: '', arrivalTime: '', departureTime: '' })
+    stops.value.push(new StopItem())
 }
 
-const removeStop = (index) => {
+const deleteStop = (index) => {
     stops.value.splice(index, 1)
 }
 
-const handleSubmit = () => {}
+const handleSubmit = () => {
+    addPath(
+        new PathItem(
+            departurePlace.value,
+            departureTime.value,
+            arrivalPlace.value,
+            arrivalTime.value,
+            totalTravelTime,
+            stops.value,
+        ),
+    )
+    handleCreatePathFormOpen()
+}
 </script>
 
 <style scoped lang="scss">
@@ -147,33 +125,17 @@ const handleSubmit = () => {}
         border-radius: 20px;
     }
 
-    &__item {
-        display: flex;
-        flex-direction: column;
-        row-gap: 10px;
-    }
+    &__button {
+        color: $grey_2;
 
-    &__inputs {
-        display: flex;
-        gap: 10px;
-    }
-
-    &__field {
-        padding: 10px;
-
-        background-color: $white;
-
-        border: 1px solid $grey_3;
-        border-radius: 10px;
-
-        transition: background-color 0.3s ease-in-out;
+        transition: color 0.1s ease-in-out;
 
         &:hover {
-            background-color: $grey_4;
+            color: $black;
         }
 
-        & > label {
-            cursor: pointer;
+        &:active {
+            color: $grey_3;
         }
     }
 }

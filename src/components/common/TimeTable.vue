@@ -1,23 +1,35 @@
 <template>
     <div class="timeTable">
-        <h1 class="timeTable__title">Маршуртный лист</h1>
-        <ul class="timeTable__list">
-            <PathItem v-for="item in pathItems" :key="item.id" :text="item" />
+        <h1 class="timeTable__title">Маршруты</h1>
+        <ul v-if="pathes.length > 0" class="timeTable__list">
+            <PathItem
+                v-for="(path, index) in pathes"
+                :key="index"
+                :path="path"
+                @dblclick="deletePath(index)"
+            />
         </ul>
+        <p v-else class="timeTable__text">Маршрутов нет</p>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+
+import { usePathesStore } from '@/stores/usePathesStore'
 
 import PathItem from './PathItem.vue'
-// example
-const pathItems = ref(['Путь 1', 'Путь 2', 'Путь 3', 'Путь 4'])
-// example
+
+const pathesStore = usePathesStore()
+
+const { pathes } = storeToRefs(pathesStore)
+const { deletePath } = pathesStore
 </script>
 
 <style lang="scss" scoped>
 .timeTable {
+    margin-bottom: 50px;
+
     @include flex_column_center;
     row-gap: 30px;
 
@@ -28,6 +40,12 @@ const pathItems = ref(['Путь 1', 'Путь 2', 'Путь 3', 'Путь 4'])
     &__list {
         @include flex_column_center;
         row-gap: 15px;
+    }
+
+    &__text {
+        @include p_normal_font;
+
+        color: $red_1;
     }
 }
 </style>

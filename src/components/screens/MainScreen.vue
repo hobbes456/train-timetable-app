@@ -1,26 +1,29 @@
 <template>
     <div class="mainScreen">
-        <MainButton text="Создать путь" :is-big="true" :on-click="handleClick" />
+        <MainButton text="Создать путь" :is-big="true" :on-click="handleOpen" />
         <TimeTable />
-        <ModalWindow v-if="showModal" title="Заполните форму" :on-close="handleClick">
+        <ModalWindow v-if="isCreatePathFormOpen" title="Заполните форму" :on-close="handleOpen">
             <CreatePathForm />
         </ModalWindow>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+
+import { useWindowStore } from '@/stores/useWindowStore'
 
 import MainButton from '@/components/common/MainButton.vue'
 import TimeTable from '@/components/common/TimeTable.vue'
 import ModalWindow from '@/components/common/ModalWindow.vue'
 import CreatePathForm from '@/components/common/CreatePathForm.vue'
 
-const showModal = ref(false)
+const windowStore = useWindowStore()
 
-const handleClick = () => {
-    showModal.value = !showModal.value
-}
+const { isCreatePathFormOpen } = storeToRefs(windowStore)
+const { handleCreatePathFormOpen } = windowStore
+
+const handleOpen = () => handleCreatePathFormOpen()
 </script>
 
 <style scoped lang="scss">

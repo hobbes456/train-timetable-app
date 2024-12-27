@@ -49,3 +49,52 @@
     justify-content: center;
     align-items: center;
 }
+
+@mixin form_item {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+
+    &__tools {
+        display: flex;
+        justify-content: space-between;
+
+        & > label {
+            cursor: pointer;
+        }
+    }
+
+    &__button {
+        color: $grey_1;
+
+        transition: color 0.1s ease-in-out;
+
+        &:hover {
+            color: $red_1;
+        }
+
+        &:active {
+            color: $grey_2;
+        }
+    }
+
+    &__inputs {
+        display: flex;
+        gap: 10px;
+    }
+
+    &__field {
+        padding: 10px;
+
+        background-color: $white;
+
+        border: 1px solid $grey_3;
+        border-radius: 10px;
+
+        transition: background-color 0.3s ease-in-out;
+
+        &:hover {
+            background-color: $grey_4;
+        }
+    }
+}
