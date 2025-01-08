@@ -18,8 +18,8 @@ const props = defineProps({
     },
     onClick: {
         type: Function,
-        required: true,
         default: () => console.log('Функция не передана'),
+        required: true,
     },
 })
 
@@ -43,6 +43,10 @@ const mainButtonSize = computed(() => {
         color 100ms ease-in-out,
         border-color 100ms ease-in-out;
 
+    @include v550 {
+        @include p_small_font;
+    }
+
     &:hover {
         background-color: $white;
     }
@@ -59,7 +63,8 @@ const mainButtonSize = computed(() => {
     }
 
     &_small {
-        width: 100px;
+        width: 100%;
+        max-width: 170px;
         height: 30px;
     }
 }

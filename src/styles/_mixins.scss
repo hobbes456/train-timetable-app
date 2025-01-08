@@ -17,6 +17,13 @@
     word-wrap: break-word;
 }
 
+@mixin h2_font {
+    @include roboto_medium;
+    font-size: 30px;
+    font-weight: 700;
+    word-wrap: break-word;
+}
+
 @mixin p_big_font {
     @include roboto_medium;
     font-size: 24px;
@@ -50,51 +57,32 @@
     align-items: center;
 }
 
-@mixin form_item {
-    display: flex;
-    flex-direction: column;
-    row-gap: 10px;
+@mixin input_field {
+    padding: 10px;
 
-    &__tools {
-        display: flex;
-        justify-content: space-between;
+    background-color: $white;
 
-        & > label {
-            cursor: pointer;
-        }
+    border: 1px solid $grey_3;
+    border-radius: 10px;
+
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+        background-color: $grey_4;
     }
 
-    &__button {
-        color: $grey_1;
-
-        transition: color 0.1s ease-in-out;
-
-        &:hover {
-            color: $red_1;
-        }
-
-        &:active {
-            color: $grey_2;
-        }
+    @include v550 {
+        padding: 5px;
     }
+}
 
-    &__inputs {
-        display: flex;
-        gap: 10px;
-    }
+@mixin in_modal_background {
+    background-color: $main_1;
+    border-radius: 30px;
 
-    &__field {
-        padding: 10px;
+    filter: drop-shadow(0 0 2px $main_2);
 
-        background-color: $white;
-
-        border: 1px solid $grey_3;
-        border-radius: 10px;
-
-        transition: background-color 0.3s ease-in-out;
-
-        &:hover {
-            background-color: $grey_4;
-        }
+    @include v550 {
+        border-radius: 20px;
     }
 }

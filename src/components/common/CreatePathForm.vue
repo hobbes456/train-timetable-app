@@ -1,30 +1,42 @@
 <template>
-    <form class="createPathForm" @submit.prevent="handleSubmit">
+    <form class="createPathForm" @submit.prevent="onSubmit">
         <FormItem
             title="Место отправления:"
-            v-model:place="departurePlace"
-            v-model:time="departureTime"
+            v-model:place="form.departurePlace"
+            v-model:date="form.departureDate"
+            v-model:time="form.departureTime"
         />
         <FormStopItem
-            v-for="(stop, index) in stops"
+            v-for="(stop, index) in form.stops"
             :key="index"
             :index="index"
-            :path-time="calculateTimeToStop(index)"
+            :path-time="calculateTimeToStop(form, index)"
+            :stop-time="calculateStopTime(stop)"
             :onDelete="deleteStop"
             v-model:place="stop.place"
+            v-model:a_date="stop.arrivalDate"
             v-model:a_time="stop.arrivalTime"
+            v-model:d_date="stop.departureDate"
             v-model:d_time="stop.departureTime"
         />
         <button class="createPathForm__button" type="button" @click="addStop">
             Добавить остановку
         </button>
-        <FormItem title="Место прибытия:" v-model:place="arrivalPlace" v-model:time="arrivalTime" />
-        <p>Общее время маршрута {{ totalTravelTime }}</p>
-        <button class="createPathForm__button" type="submit">Создать маршрут</button>
+        <FormItem
+            title="Место прибытия:"
+            v-model:place="form.arrivalPlace"
+            v-model:date="form.arrivalDate"
+            v-model:time="form.arrivalTime"
+        />
+        <p v-if="totalTravelTime">Общее время маршрута: {{ totalTravelTime }}</p>
+        <p v-if="error" class="createPathForm__error">{{ error }}</p>
+        <button class="createPathForm__button" type="submit">
+            {{ props.formData ? 'Сохранить' : 'Создать' }} маршрут
+        </button>
     </form>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { defineProps, ref, computed } from 'vue'
 
 import { usePathesStore } from '@/stores/usePathesStore'
 import { useWindowStore } from '@/stores/useWindowStore'
@@ -32,70 +44,68 @@ import { useWindowStore } from '@/stores/useWindowStore'
 import FormItem from '@/components/common/FormItem.vue'
 import FormStopItem from '@/components/common/FormStopItem.vue'
 
-import { timeToMinutes } from '@/constants/timeToMinutes'
-import { formatTime } from '@/constants/formatTime'
+import { validateForm } from '@/constants/validateForm'
+import { calculateTravelTime } from '@/constants/calculateTravelTime'
+import { calculateStopTime } from '@/constants/calculateStopTime'
+import { calculateTimeToStop } from '@/constants/calculateTimeToStop'
 import { PathItem } from '@/constants/classes/PathItem'
 import { StopItem } from '@/constants/classes/StopItem'
 
-const departurePlace = ref('')
-const departureTime = ref('')
+const props = defineProps({
+    formData: {
+        type: Object,
+        default: () => null,
+    },
+    index: {
+        type: Number,
+    },
+    onClose: {
+        type: Function,
+        default: () => console.log('Функция не передана'),
+    },
+})
 
-const arrivalPlace = ref('')
-const arrivalTime = ref('')
+const defaultForm = ref({
+    departurePlace: '',
+    departureDate: '',
+    departureTime: '',
 
-const stops = ref([])
+    stops: [],
+
+    arrivalPlace: '',
+    arrivalDate: '',
+    arrivalTime: '',
+})
+
+const form = ref(props.formData ? JSON.parse(JSON.stringify(props.formData)) : defaultForm.value)
+const error = ref('')
 
 const pathesStore = usePathesStore()
-const { addPath } = pathesStore
+const { addPath, updatePath } = pathesStore
 
 const windowStore = useWindowStore()
 const { handleCreatePathFormOpen } = windowStore
 
-const calculateTimeToStop = (stopIndex) => {
-    let totalMinutes = 0
-
-    if (stopIndex === 0) {
-        totalMinutes = timeToMinutes(departureTime.value, stops.value[stopIndex].arrivalTime)
-    } else {
-        totalMinutes = timeToMinutes(
-            stops.value[stopIndex - 1].departureTime,
-            stops.value[stopIndex].arrivalTime,
-        )
-    }
-
-    return formatTime(totalMinutes)
-}
-
-const totalTravelTime = computed(() => {
-    let totalMinutes = 0
-
-    if (departureTime.value && arrivalTime.value) {
-        totalMinutes += timeToMinutes(departureTime.value, arrivalTime.value)
-    }
-
-    return formatTime(totalMinutes)
-})
+const totalTravelTime = computed(() => calculateTravelTime(form.value))
 
 const addStop = () => {
-    stops.value.push(new StopItem())
+    form.value.stops.push(new StopItem())
 }
 
 const deleteStop = (index) => {
-    stops.value.splice(index, 1)
+    form.value.stops.splice(index, 1)
 }
 
-const handleSubmit = () => {
-    addPath(
-        new PathItem(
-            departurePlace.value,
-            departureTime.value,
-            arrivalPlace.value,
-            arrivalTime.value,
-            totalTravelTime,
-            stops.value,
-        ),
-    )
-    handleCreatePathFormOpen()
+const onSubmit = () => {
+    if (validateForm(form.value, error)) {
+        if (props.formData) {
+            updatePath(props.index, new PathItem(form.value, totalTravelTime))
+            props.onClose()
+        } else {
+            addPath(new PathItem(form.value, totalTravelTime))
+            handleCreatePathFormOpen()
+        }
+    }
 }
 </script>
 
@@ -104,25 +114,22 @@ const handleSubmit = () => {
     z-index: 2;
     margin-top: 20px;
 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    row-gap: 30px;
+    @include flex_column_center;
+    gap: 30px;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     padding: 30px;
 
     @include p_normal_font;
 
-    background-color: $main_1;
-    border-radius: 30px;
-
-    filter: drop-shadow(0 0 2px $main_2);
+    @include in_modal_background;
 
     @include v550 {
-        @include p_small_font;
+        max-width: 300px;
+        gap: 15px;
+        padding: 15px;
 
-        border-radius: 20px;
+        @include p_small_font;
     }
 
     &__button {
@@ -137,6 +144,13 @@ const handleSubmit = () => {
         &:active {
             color: $grey_3;
         }
+    }
+
+    &__error {
+        @include p_small_font;
+        text-align: center;
+        color: $red_1;
+        word-break: normal;
     }
 }
 </style>
