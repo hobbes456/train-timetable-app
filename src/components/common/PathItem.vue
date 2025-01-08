@@ -1,10 +1,10 @@
 <template>
-    <li class="pathItem">
+    <li class="pathItem" @click="handleOpen">
         <div class="pathItem__places">
-            <p>{{ props.path.d_place }}</p>
-            <p>{{ props.path.a_place }}</p>
+            <p>{{ props.path.departurePlace }}</p>
+            <p>{{ props.path.arrivalPlace }}</p>
         </div>
-        <p>Кол-во остановок: {{ props.path.stops.length || 0 }}</p>
+        <p>Кол-во остановок: {{ props.path.stops.length }}</p>
         <p>Время в пути: {{ props.path.totalTime }}</p>
     </li>
 </template>
@@ -28,7 +28,7 @@ const props = defineProps({
     row-gap: 5px;
     align-items: center;
     width: 100%;
-    max-width: 350px;
+    max-width: 400px;
 
     padding: 15px;
 
@@ -41,6 +41,8 @@ const props = defineProps({
 
     @include v550 {
         max-width: 280px;
+
+        @include p_small_font;
     }
 
     &:hover {
@@ -57,6 +59,10 @@ const props = defineProps({
         width: 100%;
 
         @include p_big_font;
+
+        @include v550 {
+            @include p_normal_font;
+        }
     }
 }
 </style>

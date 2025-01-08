@@ -2,7 +2,7 @@
     <div class="mainScreen">
         <MainButton text="Создать путь" :is-big="true" :on-click="handleOpen" />
         <TimeTable />
-        <ModalWindow v-if="isCreatePathFormOpen" title="Заполните форму" :on-close="handleOpen">
+        <ModalWindow v-if="isCreatePathFormOpen" title="Новый маршрут" :on-close="handleOpen">
             <CreatePathForm />
         </ModalWindow>
     </div>

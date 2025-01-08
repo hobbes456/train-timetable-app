@@ -11,6 +11,11 @@ export const usePathesStore = defineStore('todo', () => {
         saveToLocalStorage()
     }
 
+    const updatePath = (index, newPath) => {
+        pathes.value[index] = newPath
+        saveToLocalStorage()
+    }
+
     const deletePath = (index) => {
         pathes.value.splice(index, 1)
         saveToLocalStorage()
@@ -20,5 +25,5 @@ export const usePathesStore = defineStore('todo', () => {
         localStorage.setItem(PATHES, JSON.stringify(pathes.value))
     }
 
-    return { pathes, addPath, deletePath }
+    return { pathes, addPath, updatePath, deletePath }
 })

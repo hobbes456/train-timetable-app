@@ -19,6 +19,7 @@ const props = defineProps({
     onClose: {
         type: Function,
         default: () => console.log('Функция не передана'),
+        required: true,
     },
 })
 </script>
